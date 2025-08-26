@@ -1,9 +1,13 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.dagger.hilt)
     id("org.jetbrains.kotlin.kapt")
+    id("kotlin-kapt")     // <- ต้องมี
+    id("com.google.dagger.hilt.android")     // <- ต้องมี
+
 
 }
 
@@ -20,8 +24,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"96a8ea9a212673dfe1dd4b8610fc6e9f\"")
+    }
+    android.buildFeatures.buildConfig = true
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -42,6 +48,12 @@ android {
         compose = true
         viewBinding = true
     }
+    // แก้ไฟล์ซ้ำ
+    packaging {
+        resources {
+            excludes.add("META-INF/gradle/incremental.annotation.processors")
+        }
+    }
 }
 
 dependencies {
@@ -54,11 +66,30 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    //AndroidX
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    //Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
-    kapt("com.google.dagger:hilt-android-compiler:2.57.1")
+    kapt("com.google.dagger:hilt-compiler:2.57.1")
 
+    implementation(libs.hilt.navigation.compose)
+
+    //Google Play Service
+    implementation(libs.play.services.location)
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp3.logging)
+
+    implementation(libs.coil.compose)
+    implementation(libs.font.awesome)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

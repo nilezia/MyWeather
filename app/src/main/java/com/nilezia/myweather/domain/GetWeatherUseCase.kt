@@ -1,0 +1,55 @@
+package com.nilezia.myweather.domain
+
+import com.nilezia.myweather.data.api.ApiService
+import com.nilezia.myweather.data.api.WeatherResponse
+import com.nilezia.myweather.data.repository.WeatherRepository
+import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import javax.inject.Inject
+
+interface GetWeatherUseCase {
+    fun execute(lat: Double, lon: Double): Flow<CurrentWeatherUi>
+}
+
+class GetWeatherUseCaseImpl @Inject constructor(private val weatherRepository: WeatherRepository) :
+    GetWeatherUseCase {
+    override fun execute(lat: Double, lon: Double): Flow<CurrentWeatherUi> {
+
+        return weatherRepository.getWeather(lat, lon).map {
+            mapDataToDomain(it)
+        }
+    }
+
+    private fun mapDataToDomain(weatherResponse: WeatherResponse): CurrentWeatherUi {
+        return CurrentWeatherUi(
+            mainWeather = weatherResponse.weather?.firstOrNull()?.main.orEmpty(),
+            temperature = weatherResponse.main?.temp.toString(),
+            humidity = weatherResponse.main?.humidity.toString(),
+            windSpeed = weatherResponse.wind?.speed.toString(),
+            description = weatherResponse.weather?.firstOrNull()?.description.orEmpty(),
+            iconUrl = "https://openweathermap.org/img/wn/${weatherResponse.weather?.firstOrNull()?.icon}@2x.png",
+            city = weatherResponse.name.orEmpty(),
+            sunrise = weatherResponse.sys?.sunrise?.let {
+                formatTimestamp(it)
+            } ?: "",
+            sunset = weatherResponse.sys?.sunset?.let {
+                formatTimestamp(it)
+            } ?: "",
+            country = weatherResponse.sys?.country.orEmpty(),
+            feelsLike = weatherResponse.main?.feels_like.toString(),
+            tempMax = weatherResponse.main?.temp_max.toString(),
+            tempMin = weatherResponse.main?.temp_min.toString()
+        )
+    }
+
+    fun formatTimestamp(timestamp: Long): String {
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(Date(timestamp * 1000))
+    }
+
+
+}

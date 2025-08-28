@@ -1,4 +1,3 @@
-use mvvm + clean 
 # MyWeather
 Use
   - Jectpack Compose

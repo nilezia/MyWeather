@@ -2,18 +2,20 @@ package com.nilezia.myweather.data.repository
 
 import com.google.gson.Gson
 import com.nilezia.myweather.data.api.ApiService
-import com.nilezia.myweather.data.api.WeatherResponse
+import com.nilezia.myweather.data.model.ForcastResponse
+import com.nilezia.myweather.data.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 interface WeatherRepository {
-    fun getWeather(lat: Double, lon: Double): Flow<WeatherResponse>
+    fun getCurrentWeather(lat: Double, lon: Double): Flow<WeatherResponse>
+    fun getForecast(lat: Double, lon: Double): Flow<ForcastResponse>
 }
 
 class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     WeatherRepository {
-    override fun getWeather(lat: Double, lon: Double): Flow<WeatherResponse> {
+    override fun getCurrentWeather(lat: Double, lon: Double): Flow<WeatherResponse> {
         return flow {
             try {
               /*  val response = apiService.getCurrentWeather(lat, lon)
@@ -74,5 +76,23 @@ class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiServi
                 throw Exception("Failed to fetch weather data")
             }
         }
+    }
+
+    override fun getForecast(
+        lat: Double,
+        lon: Double
+    ): Flow<ForcastResponse> {
+        return flow {
+            val response = apiService.getForecastWeather(lat, lon)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(it)
+                }
+            } else {
+                throw Exception("Failed to fetch weather data")
+            }
+        }
+
+
     }
 }

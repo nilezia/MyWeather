@@ -1,4 +1,4 @@
-package com.nilezia.myweather.data.api
+package com.nilezia.myweather.data.model
 
 import com.google.gson.annotations.SerializedName
 
@@ -66,7 +66,9 @@ data class WeatherResponse(
 
     data class Rain(
         @SerializedName("1h")
-        val oneHour: Double? = null
+        val oneHour: Double? = null,
+        @SerializedName("3h")
+    val treeHour: Double? = null
     )
 
     data class Sys(

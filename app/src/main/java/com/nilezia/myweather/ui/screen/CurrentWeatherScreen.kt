@@ -33,12 +33,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.nilezia.myweather.R
 import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.WeatherUi
+import com.nilezia.myweather.ui.screen.mock.weatherUiMock
 import com.nilezia.myweather.ui.theme.MyWeatherTheme
 import com.nilezia.myweather.ui.viewmodel.WeatherUiState
 
 @Composable
-fun CurrentWeatherScreen(uiState: CurrentWeatherUi) {
-    MainCurrentWeather(uiState)
+fun CurrentWeatherScreen(currentWeatherUi: CurrentWeatherUi) {
+    MainCurrentWeather(currentWeatherUi)
 
 }
 
@@ -70,7 +72,7 @@ fun MainCurrentWeather(weather: CurrentWeatherUi) {
         }
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = "${weather.temperature.toDouble().toInt()}°C",
+            text = "${weather.weatherUi.temperature.toDouble().toInt()}°C",
             fontSize = 64.sp,
             color = Color.White
         )
@@ -82,7 +84,7 @@ fun MainCurrentWeather(weather: CurrentWeatherUi) {
             Text(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                text = weather.description,
+                text = weather.weatherUi.description,
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White
             )
@@ -95,7 +97,7 @@ fun MainCurrentWeather(weather: CurrentWeatherUi) {
                     .padding(start = 16.dp) // กำหนดขนาดไอคอน
             )
         }
-        Temperature(weather, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp))
+        Temperature(weather.weatherUi, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp) // เว้นระยะระหว่างการ์ด
@@ -109,14 +111,26 @@ fun MainCurrentWeather(weather: CurrentWeatherUi) {
 }
 
 @Composable
-fun Temperature(weather: CurrentWeatherUi, modifier: Modifier) {
-    Column (modifier = modifier){
+fun Temperature(weather: WeatherUi, modifier: Modifier) {
+    Column(modifier = modifier) {
         Row {
-            Text(text = "↑${weather.tempMax.toDouble().toInt()}°", fontSize = 22.sp, color = Color.White)
+            Text(
+                text = "↑${weather.tempMax.toDouble().toInt()}°",
+                fontSize = 22.sp,
+                color = Color.White
+            )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "↓${weather.tempMin.toDouble().toInt()}°",  fontSize = 22.sp, color = Color.White)
+            Text(
+                text = "↓${weather.tempMin.toDouble().toInt()}°",
+                fontSize = 22.sp,
+                color = Color.White
+            )
         }
-        Text(text = "อุณหภูมิที่รู้สึกได้ ${weather.feelsLike}°",  fontSize = 22.sp, color = Color.White)
+        Text(
+            text = "อุณหภูมิที่รู้สึกได้ ${weather.feelsLike}°",
+            fontSize = 22.sp,
+            color = Color.White
+        )
     }
 }
 
@@ -146,7 +160,7 @@ fun WindCard(weather: CurrentWeatherUi, modifier: Modifier) {
                     modifier = Modifier.padding(start = 8.dp),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    text = "${weather.windSpeed} km/h",
+                    text = "${weather.weatherUi.windSpeed} km/h",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
@@ -167,7 +181,7 @@ fun WindCard(weather: CurrentWeatherUi, modifier: Modifier) {
                     modifier = Modifier.padding(start = 8.dp),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    text = "${weather.humidity} %",
+                    text = "${weather.weatherUi.humidity} %",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
@@ -236,22 +250,8 @@ fun SunCard(weather: CurrentWeatherUi, modifier: Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun WeatherScreenPreview() {
-    // ตัวอย่าง mock data
     val mockWeather = WeatherUiState.Success(
-        weather = CurrentWeatherUi(
-            city = "หนองจอก",
-            temperature = "4.33",
-            mainWeather = "ฝนตกหนัก",
-            sunset = "17:00",
-            sunrise = "06:00",
-            country = "TH",
-            windSpeed = "1.5",
-            humidity = "80",
-            description = "ฝนตกหนัก",
-            iconUrl = "https://openweathermap.org/img/wn/10d@2x.png"
-
-
-        )
+        weatherUiMock()
     )
     MyWeatherTheme {
         Box(

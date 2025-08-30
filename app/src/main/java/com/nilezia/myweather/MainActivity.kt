@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,9 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.WeatherUi
 import com.nilezia.myweather.ui.screen.CurrentWeatherScreen
-import com.nilezia.myweather.ui.screen.ForecastScreen
-import com.nilezia.myweather.ui.screen.MainCurrentWeather
+import com.nilezia.myweather.ui.screen.mock.weatherUiMock
 import com.nilezia.myweather.ui.theme.MyWeatherTheme
 import com.nilezia.myweather.ui.viewmodel.CurrentWeatherViewModel
 import com.nilezia.myweather.ui.viewmodel.WeatherUiState
@@ -170,20 +167,7 @@ class MainActivity : ComponentActivity() {
     fun WeatherScreenPreview() {
         // ตัวอย่าง mock data
         val mockWeather = WeatherUiState.Success(
-            weather = CurrentWeatherUi(
-                city = "หนองจอก",
-                temperature = "4.33",
-                mainWeather = "ฝนตกหนัก",
-                sunset = "17:00",
-                sunrise = "06:00",
-                country = "TH",
-                windSpeed = "1.5",
-                humidity = "80",
-                description = "ฝนตกหนัก",
-                iconUrl = "https://openweathermap.org/img/wn/10d@2x.png"
-
-
-            )
+            weather = weatherUiMock()
         )
 
         MyWeatherTheme {

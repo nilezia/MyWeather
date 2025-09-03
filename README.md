@@ -5,4 +5,4 @@ Use
   - Coroutine
   - Hilt
   - Retrofit
-<img width="800" height="600" alt="Screenshot_20250903_191742" src="https://github.com/user-attachments/assets/3aed8191-c83b-4d59-b5e5-19aadb2e9f75" />
+<img width="720" height="1480" alt="Screenshot_20250903_191742" src="https://github.com/user-attachments/assets/a264a5f6-e94e-45ad-aedd-f56b1a01196a" />

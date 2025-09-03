@@ -4,7 +4,7 @@ data class ForcastResponse(
     val city: City? = null,
     val cnt: Int? = null,
     val cod: String? = null,
-    val list: List<Item0?>? = null,
+    val list: List<Item>? = null,
     val message: Int? = null
 ) {
     data class City(
@@ -23,7 +23,7 @@ data class ForcastResponse(
         )
     }
 
-    data class Item0(
+    data class Item(
         val clouds: WeatherResponse.Clouds? = null,
         val dt: Int? = null,
         val dt_txt: String? = null,
@@ -42,7 +42,5 @@ data class ForcastResponse(
             val id: Int? = null,
             val main: String? = null
         )
-
-
     }
 }

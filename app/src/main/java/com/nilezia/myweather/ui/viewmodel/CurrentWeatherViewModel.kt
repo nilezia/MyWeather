@@ -7,6 +7,7 @@ import com.nilezia.myweather.data.repository.CurrentLocationRepository
 import com.nilezia.myweather.domain.GetForecastUseCase
 import com.nilezia.myweather.domain.GetWeatherUseCase
 import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.ForecastUi
 import com.nilezia.myweather.domain.model.WeatherUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 Log.d("TAG", "getCurrentWeather: ${e.message}")
             }
             .collect {
-                _uiState.value = WeatherUiState.Success(it)
+               _uiState.value = WeatherUiState.Success(WeatherTypeUiState.CurrentWeatherState(weather = it))
                 Log.d("TAG", "getCurrentWeather: $it.")
             }
     }
@@ -82,7 +83,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 Log.d("TAG", "getCurrentWeather: ${e.message}")
             }
             .collect {
-                //_uiState.value = WeatherUiState.Success(it)
+                _uiState.value = WeatherUiState.Success(WeatherTypeUiState.ForecastWeatherState(it))
                 Log.d("TAG", "getCurrentWeather: $it.")
             }
     }
@@ -90,6 +91,11 @@ class CurrentWeatherViewModel @Inject constructor(
 
 sealed class WeatherUiState {
     object Loading : WeatherUiState()                   // กำลังโหลด
-    data class Success(val weather: CurrentWeatherUi) : WeatherUiState() // โหลดเสร็จ
-    data class Error(val message: String) : WeatherUiState()            // เกิด error
+    data class Success(val weatherState: WeatherTypeUiState) : WeatherUiState() // โหลดเสร็จ
+    data class Error(val message: String) : WeatherUiState() // เกิด error
+}
+
+sealed class WeatherTypeUiState{
+    data class CurrentWeatherState(val weather: CurrentWeatherUi): WeatherTypeUiState()
+    data class ForecastWeatherState(val forecast: ForecastUi): WeatherTypeUiState()
 }

@@ -35,11 +35,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nilezia.myweather.domain.model.CurrentWeatherUi
-import com.nilezia.myweather.domain.model.WeatherUi
+import com.nilezia.myweather.domain.model.ForecastUi
 import com.nilezia.myweather.ui.screen.CurrentWeatherScreen
+import com.nilezia.myweather.ui.screen.ForecastScreen
 import com.nilezia.myweather.ui.screen.mock.weatherUiMock
 import com.nilezia.myweather.ui.theme.MyWeatherTheme
 import com.nilezia.myweather.ui.viewmodel.CurrentWeatherViewModel
+import com.nilezia.myweather.ui.viewmodel.WeatherTypeUiState
 import com.nilezia.myweather.ui.viewmodel.WeatherUiState
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -47,15 +49,20 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private var weather: CurrentWeatherUi by mutableStateOf(CurrentWeatherUi())
+    private var weatherForecast: ForecastUi by mutableStateOf(ForecastUi())
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyWeatherTheme {
                 val viewModel: CurrentWeatherViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
-                WeatherScreen(uiState, onRefresh = { viewModel.getCurrentWeather() })
+                WeatherScreen(uiState, onRefresh = {
+                    viewModel.getCurrentWeather()
+                    viewModel.getForecastWeather()
+                })
                 LaunchedEffect(Unit) {
                     viewModel.getCurrentWeather()
+                    viewModel.getForecastWeather()
                 }
             }
 
@@ -86,7 +93,11 @@ class MainActivity : ComponentActivity() {
                         title = { Text("${weather.city}") },
                         actions = {
                             IconButton(onClick = { onRefresh() }) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Refresh",  tint = Color.White)
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = "Refresh",
+                                    tint = Color.White
+                                )
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
@@ -97,8 +108,7 @@ class MainActivity : ComponentActivity() {
                 },
                 content = { padding ->
                     Column(modifier = Modifier.padding(padding)) {
-
-                        CurrentWeatherScreen(weather)
+                        CurrentWeatherScreen(weather, weatherForecast)
 
                     }
                 }
@@ -120,8 +130,15 @@ class MainActivity : ComponentActivity() {
             }
 
             is WeatherUiState.Success -> {
-                 weather = uiState.weather
-                CurrentWeatherScreen(weather)
+                when (uiState.weatherState) {
+                    is WeatherTypeUiState.CurrentWeatherState -> {
+                        weather = uiState.weatherState.weather
+                    }
+
+                    is WeatherTypeUiState.ForecastWeatherState -> {
+                        weatherForecast = uiState.weatherState.forecast
+                    }
+                }
             }
 
             is WeatherUiState.Error -> {
@@ -136,45 +153,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    @Composable
-    fun WeatherTabs(tabs: List<String>, selectedTab: Int, onTabSelected: (Int) -> Unit) {
-        TabRow(
-            selectedTabIndex = selectedTab,
-            contentColor = Color.White,
-            containerColor = Color.Transparent,
-            indicator = { tabPositions ->
-                Box(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTab])
-                        .padding(horizontal = 16.dp)
-                        .background(Color.White)
-                )
-            }
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { onTabSelected(index) },
-                    text = { Text(title) }
-                )
-            }
-        }
-    }
-
     @Preview(showBackground = true)
     @Composable
     fun WeatherScreenPreview() {
         // ตัวอย่าง mock data
         val mockWeather = WeatherUiState.Success(
-            weather = weatherUiMock()
+            WeatherTypeUiState.CurrentWeatherState(weatherUiMock())
         )
-
         MyWeatherTheme {
-            WeatherScreen(
-                uiState = mockWeather
-            )
+            Column(modifier = Modifier.fillMaxSize()) {
+                WeatherScreen(
+                    uiState = mockWeather
+                )
+            }
         }
-
     }
 }

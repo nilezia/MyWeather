@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 interface WeatherRepository {
-    fun getCurrentWeather(lat: Double, lon: Double): Flow<WeatherResponse>
+    fun getDailyWeather(lat: Double, lon: Double): Flow<WeatherResponse>
     fun getForecast(lat: Double, lon: Double): Flow<ForcastResponse>
 }
 
 class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiService) :
     WeatherRepository {
-    override fun getCurrentWeather(lat: Double, lon: Double): Flow<WeatherResponse> {
+    override fun getDailyWeather(lat: Double, lon: Double): Flow<WeatherResponse> {
         return flow {
             try {
-              /*  val response = apiService.getCurrentWeather(lat, lon)
+              /*  val response = apiService.getDailyWeather(lat, lon)
                 if (response.isSuccessful) {
                     response.body()?.let {
                         emit(it)

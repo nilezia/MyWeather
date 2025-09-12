@@ -66,11 +66,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+
     //AndroidX
-    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // Compose Accompanist Permissions
+    implementation(libs.accompanist.permissions)
     //Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.compiler)

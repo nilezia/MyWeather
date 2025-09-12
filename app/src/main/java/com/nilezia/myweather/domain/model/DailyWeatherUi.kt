@@ -1,6 +1,6 @@
 package com.nilezia.myweather.domain.model
 
-data class CurrentWeatherUi(
+data class DailyWeatherUi(
     val city: String = "",
     val sunrise: String = "",
     val sunset: String = "",

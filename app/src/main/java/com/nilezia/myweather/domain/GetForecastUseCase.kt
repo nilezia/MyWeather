@@ -16,6 +16,7 @@ class GetForecastUseCaseImpl(private val weatherRepository: WeatherRepository) :
 
     override fun execute(lat: Double, lon: Double): Flow<ForecastUi> {
         return weatherRepository.getForecast(lat, lon).map {
+                val a= "a"
             mapDataToDomain(it)
         }
 

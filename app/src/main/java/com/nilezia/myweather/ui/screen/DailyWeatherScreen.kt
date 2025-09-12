@@ -20,39 +20,105 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.nilezia.myweather.R
-import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.DailyWeatherUi
 import com.nilezia.myweather.domain.model.ForecastUi
 import com.nilezia.myweather.domain.model.WeatherUi
+import com.nilezia.myweather.ui.navigate.Screen
 import com.nilezia.myweather.ui.screen.mock.weatherUiMock
 import com.nilezia.myweather.ui.theme.MyWeatherTheme
-import com.nilezia.myweather.ui.viewmodel.WeatherTypeUiState
+import com.nilezia.myweather.ui.viewmodel.WeatherViewModel
+import com.nilezia.myweather.ui.viewmodel.WeatherUiState
 
+
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CurrentWeatherScreen(currentWeatherUi: CurrentWeatherUi, forecastUi: ForecastUi) {
-    MainCurrentWeather(currentWeatherUi, forecastUi)
+fun DailyWeatherScreen(
+    viewModel: WeatherViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val locationPermissionState = rememberPermissionState(
+        android.Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
+    LaunchedEffect(locationPermissionState.status) {
+        if (locationPermissionState.status.isGranted) {
+            viewModel.getDailyWeather()
+            viewModel.getForecastWeather()
+        }
+    }
+
+    when {
+        locationPermissionState.status.isGranted -> {
+            InitialUiState(uiState, navController)
+        }
+        locationPermissionState.status.shouldShowRationale -> {
+            Text("Please grant location permission to see weather.")
+        }
+        else -> {
+            Text("Permission denied. Enable in settings.")
+        }
+    }
 }
 
 @Composable
-fun MainCurrentWeather(weather: CurrentWeatherUi, forecastUi: ForecastUi) {
+fun InitialUiState(uiState: WeatherUiState, navController: NavHostController) {
+
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if (uiState.errorMessage != null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Error: ${uiState.errorMessage}", color = Color.Red)
+        }
+    } else {
+        MainDailyWeather(uiState.dailyWeather, uiState.forecast, navController)
+    }
+}
+
+@Composable
+fun MainDailyWeather(
+    daily: DailyWeatherUi? = null,
+    forecastUi: ForecastUi? = null,
+    navController: NavHostController? = null
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -71,17 +137,23 @@ fun MainCurrentWeather(weather: CurrentWeatherUi, forecastUi: ForecastUi) {
                     modifier = Modifier.size(24.dp)
 
                 )
-                Text(
-                    text = weather.city,
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                    color = Color.White
-                )
+                daily?.city?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                        color = Color.White
+                    )
+                }
             }
         }
         item {
             Text(
                 modifier = Modifier.padding(top = 16.dp),
-                text = "${weather.weatherUi.temperature.toDouble().toInt()}°C",
+                text = if (daily?.weatherUi?.temperature != null) {
+                    "${daily.weatherUi.temperature.toDouble().toInt()}°C"
+                } else {
+                    ""
+                },
                 fontSize = 64.sp,
                 color = Color.White
             )
@@ -92,37 +164,47 @@ fun MainCurrentWeather(weather: CurrentWeatherUi, forecastUi: ForecastUi) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    text = weather.weatherUi.description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
-                )
+                daily?.weatherUi?.description?.let {
+                    Text(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                }
 
                 AsyncImage(
-                    model = weather.weatherUi.iconUrl,
+                    model = daily?.weatherUi?.iconUrl,
                     contentDescription = "Weather Icon",
                     modifier = Modifier
                         .size(64.dp)
-                        .padding(start = 16.dp) // กำหนดขนาดไอคอน
+                        .padding(start = 16.dp)
                 )
             }
-            Temperature(weather.weatherUi, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp))
+            daily?.weatherUi?.let {
+                Temperature(
+                    it,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // เว้นระยะระหว่างการ์ด
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                WindCard(weather, modifier = Modifier.weight(1f))
-                SunCard(weather, modifier = Modifier.weight(1f))
+                daily?.let { daily ->
+                    WindCard(daily, modifier = Modifier.weight(1f))
+                    SunCard(daily, modifier = Modifier.weight(1f))
+                }
             }
         }
+
         item {
-            ForecastWidget(forecastUi, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp))
+            forecastUi?.let { forecast ->
+                ForecastWidget(forecast, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp), navController)
+            }
         }
     }
-
-
 }
 
 @Composable
@@ -142,7 +224,7 @@ fun Temperature(weather: WeatherUi, modifier: Modifier) {
             )
         }
         Text(
-            text = "อุณหภูมิที่รู้สึกได้ ${weather.feelsLike}°",
+            text = stringResource(R.string.txt_feel_like, weather.feelsLike),
             fontSize = 22.sp,
             color = Color.White
         )
@@ -150,13 +232,13 @@ fun Temperature(weather: WeatherUi, modifier: Modifier) {
 }
 
 @Composable
-fun WindCard(weather: CurrentWeatherUi, modifier: Modifier) {
+fun WindCard(weather: DailyWeatherUi, modifier: Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.1f) // โปร่งนิด ๆ ให้เห็นพื้นหลัง
+            containerColor = Color.White.copy(alpha = 0.1f)
         )
     ) {
         Column {
@@ -208,7 +290,7 @@ fun WindCard(weather: CurrentWeatherUi, modifier: Modifier) {
 }
 
 @Composable
-fun SunCard(weather: CurrentWeatherUi, modifier: Modifier) {
+fun SunCard(weather: DailyWeatherUi, modifier: Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -263,15 +345,18 @@ fun SunCard(weather: CurrentWeatherUi, modifier: Modifier) {
 }
 
 @Composable
-fun ForecastWidget(forecastUi: ForecastUi, modifier: Modifier) {
+fun ForecastWidget(forecastUi: ForecastUi, modifier: Modifier, navController: NavHostController?) {
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.1f) // โปร่งนิด ๆ ให้เห็นพื้นหลัง
-        )
+            containerColor = Color.White.copy(alpha = 0.1f)
+        ),
+        onClick = {
+            navController?.navigate(Screen.ForecastWeather.route)
+        }
     ) {
         Column(
             modifier = Modifier
@@ -285,8 +370,8 @@ fun ForecastWidget(forecastUi: ForecastUi, modifier: Modifier) {
                 color = Color.White
             )
             HorizontalDivider(
-                color = DividerDefaults.color,      // สีมาตรฐานตามธีม
-                thickness = DividerDefaults.Thickness, // ความหนามาตรฐาน (1.dp)
+                color = DividerDefaults.color,
+                thickness = DividerDefaults.Thickness,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             DailyForecastScreen(forecastUi.list)
@@ -349,7 +434,7 @@ fun ForecastCard(weather: WeatherUi) {
             contentDescription = "Weather Icon",
             modifier = Modifier
                 .size(64.dp)
-                .padding(start = 16.dp) // กำหนดขนาดไอคอน
+                .padding(start = 16.dp)
         )
         Text(
             text = " ${weather.temperature}°C",
@@ -361,8 +446,8 @@ fun ForecastCard(weather: WeatherUi) {
 
 @Preview(showBackground = true)
 @Composable
-fun WeatherScreenPreview() {
-    val mockWeather = WeatherTypeUiState.CurrentWeatherState(weatherUiMock())
+fun DailyScreenPreview() {
+    val mockWeather = weatherUiMock()
     MyWeatherTheme {
         Box(
             modifier = Modifier
@@ -370,13 +455,13 @@ fun WeatherScreenPreview() {
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF90CAF9),  // ฟ้าอ่อน
-                            Color(0xFF2196F3),  // ฟ้าเข้ม
+                            Color(0xFF90CAF9),
+                            Color(0xFF2196F3),
                         )
                     )
                 )
         ) {
-            //    MainCurrentWeather(mockWeather.weather)
+            MainDailyWeather(mockWeather, ForecastUi(), null)
 
         }
     }

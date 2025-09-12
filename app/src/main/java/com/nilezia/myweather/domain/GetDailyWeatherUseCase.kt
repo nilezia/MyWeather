@@ -2,7 +2,7 @@ package com.nilezia.myweather.domain
 
 import com.nilezia.myweather.data.model.WeatherResponse
 import com.nilezia.myweather.data.repository.WeatherRepository
-import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.DailyWeatherUi
 import com.nilezia.myweather.domain.model.WeatherUi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,20 +12,20 @@ import java.util.Locale
 import javax.inject.Inject
 
 interface GetWeatherUseCase {
-    fun execute(lat: Double, lon: Double): Flow<CurrentWeatherUi>
+    fun execute(lat: Double, lon: Double): Flow<DailyWeatherUi>
 }
 
 class GetWeatherUseCaseImpl @Inject constructor(private val weatherRepository: WeatherRepository) :
     GetWeatherUseCase {
-    override fun execute(lat: Double, lon: Double): Flow<CurrentWeatherUi> {
+    override fun execute(lat: Double, lon: Double): Flow<DailyWeatherUi> {
 
-        return weatherRepository.getCurrentWeather(lat, lon).map {
+        return weatherRepository.getDailyWeather(lat, lon).map {
             mapDataToDomain(it)
         }
     }
 
-    private fun mapDataToDomain(weatherResponse: WeatherResponse): CurrentWeatherUi {
-        return CurrentWeatherUi(
+    private fun mapDataToDomain(weatherResponse: WeatherResponse): DailyWeatherUi {
+        return DailyWeatherUi(
             weatherUi = WeatherUi(
                 mainWeather = weatherResponse.weather?.firstOrNull()?.main.orEmpty(),
                 temperature = weatherResponse.main?.temp.toString(),

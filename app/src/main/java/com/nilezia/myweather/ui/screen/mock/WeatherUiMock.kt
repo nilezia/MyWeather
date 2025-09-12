@@ -1,9 +1,9 @@
 package com.nilezia.myweather.ui.screen.mock
 
-import com.nilezia.myweather.domain.model.CurrentWeatherUi
+import com.nilezia.myweather.domain.model.DailyWeatherUi
 import com.nilezia.myweather.domain.model.WeatherUi
 
-fun weatherUiMock() = CurrentWeatherUi(
+fun weatherUiMock() = DailyWeatherUi(
     city = "หนองจอก",
     sunset = "17:00",
     sunrise = "06:00",

@@ -2,6 +2,7 @@ package com.nilezia.myweather.data.repository
 
 import com.google.gson.Gson
 import com.nilezia.myweather.data.api.ApiService
+import com.nilezia.myweather.data.model.DirectLocationResponse
 import com.nilezia.myweather.data.model.ForcastResponse
 import com.nilezia.myweather.data.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,10 @@ import javax.inject.Inject
 interface WeatherRepository {
     fun getDailyWeather(lat: Double, lon: Double): Flow<WeatherResponse>
     fun getForecast(lat: Double, lon: Double): Flow<ForcastResponse>
+
+    fun getDailyWeatherByCityName(cityName: String): Flow<List<DirectLocationResponse>>
+
+
 }
 
 class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiService) :
@@ -18,15 +23,15 @@ class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiServi
     override fun getDailyWeather(lat: Double, lon: Double): Flow<WeatherResponse> {
         return flow {
             try {
-              /*  val response = apiService.getDailyWeather(lat, lon)
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        emit(it)
-                    }
-                } else {
-                    throw Exception("Failed to fetch weather data")
-                }*/
-                val json = "{\n" +
+                  val response = apiService.getDailyWeather(lat, lon)
+                  if (response.isSuccessful) {
+                      response.body()?.let {
+                          emit(it)
+                      }
+                  } else {
+                      throw Exception("Failed to fetch weather data")
+                  }
+                /*val json = "{\n" +
                         "    \"coord\": {\n" +
                         "        \"lon\": 100.84,\n" +
                         "        \"lat\": 13.8462\n" +
@@ -71,7 +76,7 @@ class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiServi
                         "    \"cod\": 200\n" +
                         "}"
                 val weatherResponse = Gson().fromJson(json, WeatherResponse::class.java)
-                emit(weatherResponse)
+                emit(weatherResponse)*/
             } catch (e: Exception) {
                 throw Exception("Failed to fetch weather data")
             }
@@ -94,5 +99,18 @@ class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiServi
         }
 
 
+    }
+
+    override fun getDailyWeatherByCityName(cityName: String): Flow<List<DirectLocationResponse>> {
+        return flow {
+            val response = apiService.getWeatherByCityName(cityName)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(it)
+                }
+            } else {
+                throw Exception("Failed to fetch weather data")
+            }
+        }
     }
 }

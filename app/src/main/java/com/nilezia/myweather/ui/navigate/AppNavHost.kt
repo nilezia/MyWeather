@@ -3,9 +3,12 @@ package com.nilezia.myweather.ui.navigate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,8 +27,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nilezia.myweather.ui.screen.DailyWeatherScreen
 import com.nilezia.myweather.ui.screen.ForecastScreen
+import com.nilezia.myweather.ui.screen.OtherWeatherScreen
 import com.nilezia.myweather.ui.viewmodel.WeatherViewModel
 
 
@@ -34,8 +39,49 @@ import com.nilezia.myweather.ui.viewmodel.WeatherViewModel
 fun AppNavHost(
     navController: NavHostController,
 ) {
+
     val viewModel: WeatherViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    val topBarTitle = when (currentRoute) {
+        Screen.DailyWeather.route -> uiState.dailyWeather?.city ?: ""
+        Screen.ForecastWeather.route -> "Forecast"
+        Screen.OtherWeather.route -> "Other Locations"
+        else -> ""
+    }
+    // Dynamic actions
+    val topBarActions: @Composable RowScope.() -> Unit = {
+        when (currentRoute) {
+            Screen.DailyWeather.route -> {
+                IconButton(onClick = {
+                    viewModel.getDailyWeather()
+                    viewModel.getForecastWeather()
+
+                }) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = { navController.navigate(Screen.OtherWeather.route) }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.List,
+                        contentDescription = "Other Locations",
+                        tint = Color.White
+                    )
+                }
+            }
+
+            Screen.ForecastWeather.route -> {}
+
+            Screen.OtherWeather.route -> { }
+        }
+    }
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -52,19 +98,19 @@ fun AppNavHost(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text(uiState.dailyWeather?.city ?: "") },
-                    actions = {
-                        IconButton(onClick = {
-                            viewModel.getDailyWeather()
-                            viewModel.getForecastWeather()
-                        }) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = "Refresh",
-                                tint = Color.White
-                            )
+                    title = { Text(topBarTitle) },
+                    navigationIcon = {
+                        if (navController.previousBackStackEntry != null) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    tint = Color.White,
+                                    contentDescription = "Back"
+                                )
+                            }
                         }
                     },
+                    actions = topBarActions,
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                         titleContentColor = Color.White
@@ -86,8 +132,17 @@ fun AppNavHost(
                     // Forecast Detail Screen
                     composable(Screen.ForecastWeather.route) {
                         Column(modifier = Modifier.padding(padding)) {
-                            ForecastScreen(viewModel)
+                           // ForecastScreen(viewModel)
 
+                        }
+                    }
+
+                    composable(Screen.OtherWeather.route) {
+                        Column(modifier = Modifier.padding(padding)) {
+                            OtherWeatherScreen(navController = navController, onSelect = {
+                                viewModel.getDailyWeather(it.lat, it.lon)
+                                viewModel.getForecastWeather(it.lat, it.lon)
+                            })
                         }
                     }
                 }
@@ -99,4 +154,5 @@ fun AppNavHost(
 sealed class Screen(val route: String) {
     object DailyWeather : Screen("daily_weather")
     object ForecastWeather : Screen("forecast")
+    object OtherWeather : Screen("other_weather")
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -72,9 +72,10 @@ fun DailyWeatherScreen(
     )
 
     LaunchedEffect(locationPermissionState.status) {
-        if (locationPermissionState.status.isGranted) {
-            viewModel.getDailyWeather()
-            viewModel.getForecastWeather()
+        if (!locationPermissionState.status.isGranted) {
+            locationPermissionState.launchPermissionRequest()
+        } else {
+            viewModel.loadWeatherIfNeeded()
         }
     }
 
@@ -82,9 +83,15 @@ fun DailyWeatherScreen(
         locationPermissionState.status.isGranted -> {
             InitialUiState(uiState, navController)
         }
+
         locationPermissionState.status.shouldShowRationale -> {
             Text("Please grant location permission to see weather.")
+            Button(onClick = { locationPermissionState.launchPermissionRequest() }) {
+                Text("Request Permission")
+            }
+
         }
+
         else -> {
             Text("Permission denied. Enable in settings.")
         }
@@ -201,7 +208,11 @@ fun MainDailyWeather(
 
         item {
             forecastUi?.let { forecast ->
-                ForecastWidget(forecast, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp), navController)
+                ForecastWidget(
+                    forecast,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+                    navController
+                )
             }
         }
     }
@@ -355,7 +366,7 @@ fun ForecastWidget(forecastUi: ForecastUi, modifier: Modifier, navController: Na
             containerColor = Color.White.copy(alpha = 0.1f)
         ),
         onClick = {
-            navController?.navigate(Screen.ForecastWeather.route)
+           // navController?.navigate(Screen.ForecastWeather.route)
         }
     ) {
         Column(

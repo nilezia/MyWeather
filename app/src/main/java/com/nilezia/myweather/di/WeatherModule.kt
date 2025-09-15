@@ -8,6 +8,8 @@ import com.nilezia.myweather.data.repository.WeatherRepository
 import com.nilezia.myweather.data.repository.WeatherRepositoryImpl
 import com.nilezia.myweather.domain.GetForecastUseCase
 import com.nilezia.myweather.domain.GetForecastUseCaseImpl
+import com.nilezia.myweather.domain.GetWeatherByCityUseCase
+import com.nilezia.myweather.domain.GetWeatherByCityUseCaseImpl
 import com.nilezia.myweather.domain.GetWeatherUseCase
 import com.nilezia.myweather.domain.GetWeatherUseCaseImpl
 import dagger.Module
@@ -28,6 +30,11 @@ import jakarta.inject.Singleton
     @Provides
     fun providesGetForecastUseCase(weatherRepository: WeatherRepository): GetForecastUseCase {
         return GetForecastUseCaseImpl(weatherRepository)
+    }
+
+    @Provides
+    fun providesGetWeatherByCityUseCase(weatherRepository: WeatherRepository): GetWeatherByCityUseCase {
+        return GetWeatherByCityUseCaseImpl(weatherRepository)
     }
      @Provides
     fun providesWeatherRepository(apiService: ApiService): WeatherRepository{

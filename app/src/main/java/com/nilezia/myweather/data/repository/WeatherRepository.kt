@@ -78,7 +78,7 @@ class WeatherRepositoryImpl @Inject constructor(private val apiService: ApiServi
                 val weatherResponse = Gson().fromJson(json, WeatherResponse::class.java)
                 emit(weatherResponse)*/
             } catch (e: Exception) {
-                throw Exception("Failed to fetch weather data")
+                throw Exception("${e.message}")
             }
         }
     }

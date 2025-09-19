@@ -3,6 +3,7 @@ package com.nilezia.myweather.domain
 import com.nilezia.myweather.data.model.DirectLocationResponse
 import com.nilezia.myweather.data.repository.WeatherRepository
 import com.nilezia.myweather.domain.model.DirectLocationUi
+import com.nilezia.myweather.extension.getLocalName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -20,7 +21,8 @@ class GetWeatherByCityUseCaseImpl @Inject constructor(private val weatherReposit
     ): Flow<List<DirectLocationUi>> {
         return weatherRepository.getDailyWeatherByCityName(cityName)
             .map { response ->
-                mapDataToDomain(response).filter { it.lat != -1.0 && it.lon != -1.0 }.filter { it.country !="ID" }
+                mapDataToDomain(response).filter { it.lat != -1.0 && it.lon != -1.0 }
+                    .filter { it.country != "ID" }
             }
     }
 
@@ -28,7 +30,7 @@ class GetWeatherByCityUseCaseImpl @Inject constructor(private val weatherReposit
         return response.map {
             DirectLocationUi(
                 name = it.name,
-                localNames = getLocalName(it.localNames, Locale.getDefault()),
+                localNames = it.localNames?.getLocalName() ?: "",
                 lat = it.lat,
                 lon = it.lon,
                 country = it.country,
@@ -36,12 +38,6 @@ class GetWeatherByCityUseCaseImpl @Inject constructor(private val weatherReposit
             )
         }
 
-    }
-
-   private fun getLocalName(localNames: Map<String, String>?, locale: Locale): String {
-        return localNames?.get(locale.language)
-            ?: localNames?.get("en")
-            ?: "Unknown"
     }
 
 }

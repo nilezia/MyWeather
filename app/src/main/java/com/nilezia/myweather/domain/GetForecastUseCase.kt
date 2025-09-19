@@ -33,13 +33,13 @@ class GetForecastUseCaseImpl(private val weatherRepository: WeatherRepository) :
             list = dailyForecast.map {
                 WeatherUi(
                     mainWeather = it.weather?.firstOrNull()?.main.orEmpty(),
-                    temperature = it.main?.temp.toString(),
-                    humidity = it.main?.humidity.toString(),
-                    windSpeed = it.wind?.speed.toString(),
+                    temperature = it.main?.temp?.toString()?:"-",
+                    humidity = it.main?.humidity?.toString()?:"-",
+                    windSpeed = it.wind?.speed?.toString()?:"-",
                     description = it.weather?.firstOrNull()?.description.orEmpty(),
-                    feelsLike = it.main?.feels_like.toString(),
-                    tempMax = it.main?.temp_max.toString(),
-                    tempMin = it.main?.temp_min.toString(),
+                    feelsLike = it.main?.feels_like?.toString()?:"-",
+                    tempMax = it.main?.temp_max?.toString()?:"-",
+                    tempMin = it.main?.temp_min?.toString()?:"-",
                     iconUrl = "https://openweathermap.org/img/wn/${it.weather?.firstOrNull()?.icon}@2x.png",
                 )
 

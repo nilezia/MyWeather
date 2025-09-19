@@ -54,8 +54,9 @@ android {
             excludes.add("META-INF/gradle/incremental.annotation.processors")
         }
     }
-}
 
+
+}
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -94,11 +95,21 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.font.awesome)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(kotlin("test"))
+}
+tasks.withType<Test> {
+    useJUnitPlatform() // สำคัญสำหรับ JUnit 5
 }

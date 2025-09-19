@@ -297,7 +297,6 @@ fun WindCard(weather: DailyWeatherUi, modifier: Modifier) {
         }
 
     }
-
 }
 
 @Composable

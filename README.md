@@ -18,11 +18,11 @@ UseCase → Repository → API → Model → UI
 
 🧩 Tech Stack
 
-Retrofit + Gson to call OpenWeather API
-Kotlin Coroutines + Flow / StateFlow
-Hilt for Dependency Injection
-Simple MVVM architecture
-Runtime location permission + Internet permission
+- Retrofit + Gson to call OpenWeather API
+- Kotlin Coroutines + Flow / StateFlow
+- Hilt for Dependency Injection
+- Simple MVVM architecture
+- Runtime location permission + Internet permission
 
 📸 Screenshots
 

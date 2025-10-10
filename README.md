@@ -1,4 +1,4 @@
-## 🌦️ My Weather (Android Native)
+# 🌦️ My Weather (Android Native)
 
 A simple native Android (Kotlin) weather app that shows current weather and 5-day forecast (items at 12:00).
 Uses OpenWeather API, Retrofit + Coroutines, Hilt for DI, MVVM (ViewModel + StateFlow).
@@ -12,7 +12,7 @@ Uses OpenWeather API, Retrofit + Coroutines, Hilt for DI, MVVM (ViewModel + Stat
 - 💧 Show temperature, humidity, wind speed  
 - 🎨 Clean UI with gradient background
 
-
+---
 🧠 Architecture Overview
 UseCase → Repository → API → Model → UI
 

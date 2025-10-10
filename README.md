@@ -6,7 +6,8 @@ Uses OpenWeather API, Retrofit + Coroutines, Hilt for DI, MVVM (ViewModel + Stat
 ## 🚀 Features
 
 - 🌤️ Display current weather by location  
-- 📅 5-day forecast at 12:00 PM daily  
+- 📅 5-day forecast at 12:00 PM daily
+- 📍 search weather by city name
 - 🗺️ Fetch data from OpenWeather API  
 - 💧 Show temperature, humidity, wind speed  
 - 🎨 Clean UI with gradient background
